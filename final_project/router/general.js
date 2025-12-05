@@ -27,50 +27,77 @@ public_users.post("/register", (req, res) => {
 
 // Get the book list available in the shop
 public_users.get('/', function (req, res) {
-  return res.status(200).json(books); // or res.send(JSON.stringify(books, null, 4));
+  const getAvailableBooks = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(books);
+    }, 1000);
+  }).then(result => {
+    return res.status(200).json(result); // or res.send(JSON.stringify(books, null, 4));
+  }).catch(err => {
+    return res.status(400).json({ message: `An error occured while fetching books: ${err.message}` });
+  })
 });
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn', function (req, res) {
   const isbn = req.params.isbn;
 
-  const book = books[isbn];
-  if (!book) return res.status(404).json({ message: "Book can not be found!" });
-
-  return res.status(200).json(book);
+  const getBookByISBN = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(books[isbn]);
+    }, 1000);
+  }).then(book => {
+    if (book === undefined) throw new Error("Book can not be found!");
+    return res.status(200).json(book);
+  }).catch(err => {
+    return res.status(400).json({ message: `An error occured while fetching book: ${err.message}` });
+  })
 });
 
 // Get book details based on author
 public_users.get('/author/:author', function (req, res) {
   const author = req.params.author;
 
-  const bookIndexesArray = Object.keys(books);
-  const booksOfAuthor = [];
+  const getBooksByAuthor = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const bookIndexesArray = Object.keys(books);
+      const booksOfAuthor = [];
 
-  for (const index of bookIndexesArray) {
-    if (books[index].author === author) booksOfAuthor.push(books[index]);
-  }
+      for (const index of bookIndexesArray) {
+        if (books[index].author === author) booksOfAuthor.push(books[index]);
+      }
 
-  if (booksOfAuthor.length === 0) return res.status(200).json({ message: "No book from the selected author!" });
-
-  return res.status(200).json(booksOfAuthor);
+      resolve(booksOfAuthor);
+    }, 1000);
+  }).then(result => {
+    if (result.length === 0) return res.status(200).json({ message: "No book from the selected author!" });
+    return res.status(200).json(result);
+  }).catch(err => {
+    return res.status(400).json({ message: `An error occured while fetching books: ${err.message}` });
+  })
 });
 
 // Get all books based on title
 public_users.get('/title/:title', function (req, res) {
-
   const title = req.params.title;
 
-  const bookIndexesArray = Object.keys(books);
-  const booksOfTitle = [];
+  const getBookByTitle = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const bookIndexesArray = Object.keys(books);
+      const booksOfTitle = [];
 
-  for (const index of bookIndexesArray) {
-    if (books[index].title === title) booksOfTitle.push(books[index]);
-  }
+      for (const index of bookIndexesArray) {
+        if (books[index].title === title) booksOfTitle.push(books[index]);
+      }
 
-  if (booksOfTitle.length === 0) return res.status(200).json({ message: "No book with the selected title" });
-
-  return res.status(200).json(booksOfTitle);
+      resolve(booksOfTitle);
+    }, 1000);
+  }).then(result => {
+    if (result.length === 0) return res.status(200).json({ message: "No book with the selected title" });
+    return res.status(200).json(result);
+  }).catch(err => {
+    return res.status(400).json({ message: `An error occured while fetching books: ${err.message}` });
+  })
 });
 
 //  Get book review
